@@ -18,7 +18,7 @@
     </frontend>
     <admin>
         <routers>
-                <complaints>
+            <complaints>
                 <use>admin</use>
                 <args>
                     <module>M1_Complaints</module>
@@ -29,11 +29,11 @@
     </admin>
     <adminhtml>
         <layout>
-          <updates>
-            <complaints>
-              <file>complaints.xml</file>
-            </complaints>
-          </updates>
+            <updates>
+                <complaints>
+                    <file>complaints.xml</file>
+                </complaints>
+            </updates>
         </layout>
         <events>
             <salesext29_item_save_after>
@@ -73,7 +73,7 @@
                 </M1_Complaints>
             </modules>
         </translate>
-    </adminhtml>  
+    </adminhtml>
     <global>
         <blocks>
             <complaints>

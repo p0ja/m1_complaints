@@ -2,8 +2,6 @@
 
 class M1_Complaints_Model_Item_Status extends Varien_Object
 {
-    public $_options;
-
     const STATUS_OUT = 0;
     const STATUS_WAIT_FOR_PROTOCOL = 1;
     const STATUS_REGISTERED = 2;
@@ -14,9 +12,15 @@ class M1_Complaints_Model_Item_Status extends Varien_Object
     const STATUS_ACCEPTED_AND_COMPENSATED = 7;
     const STATUS_APPEAL = 8;
     const STATUS_RABAT = 9;
-    
+    public $_options;
 
-    public function toOptionArray($isRequired=false)
+    public function getLabel($id)
+    {
+        $this->toOptionArray();
+        return isset($this->_options[$id]) ? $this->_options[$id] : '';
+    }
+
+    public function toOptionArray($isRequired = false)
     {
         if (is_null($this->_options)) {
             $this->_options = array();
@@ -37,13 +41,7 @@ class M1_Complaints_Model_Item_Status extends Varien_Object
         return $this->_options;
     }
 
-    public function getLabel($id)
-    {
-        $this->toOptionArray();
-        return isset($this->_options[$id]) ? $this->_options[$id] : '';
-    }
-
-    public function getPriceByStatus($sid,$price)
+    public function getPriceByStatus($sid, $price)
     {
         return $sid > 4 ? 0 : $price;
     }

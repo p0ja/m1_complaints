@@ -1,12 +1,12 @@
 <?php
 
-class M1_Complaints_Block_Adminhtml_Complaint_Grid_Renderer_Deadline 
+class M1_Complaints_Block_Adminhtml_Complaint_Grid_Renderer_Deadline
     extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action
 {
     public function render(Varien_Object $row)
     {
         $deadline = strtotime($row->getDeadline());
-        if(!$deadline) {
+        if (!$deadline) {
             return '';
         }
 
@@ -16,8 +16,8 @@ class M1_Complaints_Block_Adminhtml_Complaint_Grid_Renderer_Deadline
                 M1_Complaints_Model_Item_Status::STATUS_REGISTERED,
                 M1_Complaints_Model_Item_Status::STATUS_PREPARED
             ), true) && (time() > ($deadline - $deadline_mark))
-        ){
-            $deadline_date = date("d-m-Y",$deadline);
+        ) {
+            $deadline_date = date("d-m-Y", $deadline);
 
             return "<span class=\"error\">$deadline_date</span>";
         }

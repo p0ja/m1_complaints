@@ -2,14 +2,14 @@
 <config>
     <sections>
         <complaintsconfig translate="label" module="complaints">
-        	<label>Complaints</label>
-        	<tab>M1config</tab>
+            <label>Complaints</label>
+            <tab>M1config</tab>
             <frontend_type>text</frontend_type>
-        	<sort_order>1000</sort_order>
+            <sort_order>1000</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
-        	<groups>
+            <groups>
                 <complaints translate="label comment" module="complaints">
                     <label>Complaint module parameters</label>
                     <frontend_type>text</frontend_type>
@@ -26,7 +26,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                             <comment><![CDATA[complaint service duration since shipment (default=30)]]></comment>
-                        </delay> 
+                        </delay>
                         <filetypes translate="label">
                             <label>typy plików</label>
                             <frontend_type>text</frontend_type>
@@ -34,8 +34,9 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment><![CDATA[alloed filetypes (separated by colon) protocols and complaints]]></comment>
-                        </filetypes> 
+                            <comment>
+                                <![CDATA[alloed filetypes (separated by colon) protocols and complaints]]></comment>
+                        </filetypes>
                     </fields>
                 </complaints>
             </groups>

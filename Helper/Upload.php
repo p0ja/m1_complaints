@@ -12,13 +12,13 @@ class M1_Complaints_Helper_Upload extends Mage_Core_Helper_Abstract
             $uploader->setAllowedExtensions($filetypes);
             $uploader->setAllowRenameFiles(false);
             $uploader->setFilesDispersion(false);
-            $_FILES[$file]['name'] = $data['item_id'].urlencode($_FILES[$file]['name']);
-            $complaintsPath = Mage::getBaseDir('media') . DS . 'complaints' . DS ;
+            $_FILES[$file]['name'] = $data['item_id'] . urlencode($_FILES[$file]['name']);
+            $complaintsPath = Mage::getBaseDir('media') . DS . 'complaints' . DS;
 
             $uploader->save($complaintsPath, $_FILES[$file]['name']);
 
             $data[$file] = $_FILES[$file]['name'];
-        }catch(Exception $e) {
+        } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
         }
     }

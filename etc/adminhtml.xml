@@ -19,18 +19,18 @@
         <resources>
             <admin>
                 <children>
-					<system>
-						<children>
-							<config>
-								<children>
-									<complaintsconfig>
-										<title>Complaints Module Configuration</title>
-									</complaintsconfig>
-								</children>
-							</config>				
-						</children>
-					</system>
-                	<sales>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <complaintsconfig>
+                                        <title>Complaints Module Configuration</title>
+                                    </complaintsconfig>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                    <sales>
                         <children>
                             <order>
                                 <children>
@@ -45,5 +45,5 @@
                 </children>
             </admin>
         </resources>
-    </acl> 
+    </acl>
 </config>

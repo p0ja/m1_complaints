@@ -9,13 +9,13 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit
         $this->_objectId = 'entity_id';
         $this->_blockGroup = 'complaints';
         $this->_controller = 'adminhtml_complaint';
-        
+
         parent::__construct();
-		
+
         $this->_addButton('saveandcontinue', array(
-            'label'     => Mage::helper('complaints')->__('Save and continue'),
-            'onclick'   => 'saveAndContinueEdit()',
-            'class'     => 'save',
+            'label' => Mage::helper('complaints')->__('Save and continue'),
+            'onclick' => 'saveAndContinueEdit()',
+            'class' => 'save',
         ));
 
         $this->_formScripts[] = "
@@ -33,17 +33,17 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit
             editForm.submit($('edit_form').action+'back/edit/');
         }
 	    ";
-        
+
     }
-    
+
     public function getHeaderText()
     {
         $orderId = Mage::registry('item_data')->getOrderId();
         $order = Mage::getModel('sales/order')->load($orderId);
         $url = $this->getUrl('adminhtml/sales_order/view', array('order_id' => $order->getId()));
         $linkHtml = "<a href=$url>{$order->getIncrementId()}</a>";
-        
+
         return Mage::helper('complaints')->__('Edit complaint order item %s', $linkHtml);
     }
-    
+
 }
