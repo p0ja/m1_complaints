@@ -20,15 +20,15 @@ class M1_Complaints_Model_Item_Status extends Varien_Object
     {
         if (is_null($this->_options)) {
             $this->_options = array();
-            $this->_options[self::STATUS_WAIT_FOR_PROTOCOL] = "czekamy na protokół";
-            $this->_options[self::STATUS_REGISTERED] = "wprowadzona";
-            $this->_options[self::STATUS_PREPARED] = "przygotowana";
-            $this->_options[self::STATUS_REPORTED] = "zgłoszona";
-            $this->_options[self::STATUS_LOSS] = "strata";
-            $this->_options[self::STATUS_ACCEPTED] = "uwzględniona";
-            $this->_options[self::STATUS_ACCEPTED_AND_COMPENSATED] = "uwzględniona i zapłacona";
-            $this->_options[self::STATUS_APPEAL] = "odwołanie";
-            $this->_options[self::STATUS_RABAT] = "sprzedaż z rabatem";
+            $this->_options[self::STATUS_WAIT_FOR_PROTOCOL] = "waiting for protocol";
+            $this->_options[self::STATUS_REGISTERED] = "registered";
+            $this->_options[self::STATUS_PREPARED] = "prepared";
+            $this->_options[self::STATUS_REPORTED] = "reported";
+            $this->_options[self::STATUS_LOSS] = "loss";
+            $this->_options[self::STATUS_ACCEPTED] = "accepted";
+            $this->_options[self::STATUS_ACCEPTED_AND_COMPENSATED] = "accepted and compensated";
+            $this->_options[self::STATUS_APPEAL] = "appeal";
+            $this->_options[self::STATUS_RABAT] = "sell with discount";
         }
         if ($isRequired) {
             array_unshift($this->_options, array(self::STATUS_OUT => " "));
