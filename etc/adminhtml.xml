@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <sales>
+            <children>
+                <order>
+                    <children>
+                        <complaints translate="title" module="complaints">
+                            <title>Complaints</title>
+                            <action>complaints/adminhtml_complaint</action>
+                            <sort_order>10</sort_order>
+                        </complaints>
+                    </children>
+                </order>
+            </children>
+        </sales>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+					<system>
+						<children>
+							<config>
+								<children>
+									<complaintsconfig>
+										<title>Complaints Module Configuration</title>
+									</complaintsconfig>
+								</children>
+							</config>				
+						</children>
+					</system>
+                	<sales>
+                        <children>
+                            <order>
+                                <children>
+                                    <complaints translate="title">
+                                        <title>Complaints</title>
+                                        <sort_order>10</sort_order>
+                                    </complaints>
+                                </children>
+                            </order>
+                        </children>
+                    </sales>
+                </children>
+            </admin>
+        </resources>
+    </acl> 
+</config>
