@@ -2,6 +2,11 @@
 
 class M1_Complaints_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    public function getComplaintPath()
+    {
+        return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'complaints' . DS;
+    }
+
     public function getComplaintForm($model)
     {
         $form = new Varien_Data_Form(array(
@@ -38,9 +43,9 @@ class M1_Complaints_Helper_Data extends Mage_Core_Helper_Abstract
             'name' => 'complaint[courier]',
         ));
 
-        $fieldset->addField('nr_lp', 'text', array(
-            'label' => Mage::helper('complaints')->__('Nubmer'),
-            'name' => 'complaint[nr_lp]',
+        $fieldset->addField('number', 'text', array(
+            'label' => Mage::helper('complaints')->__('Number'),
+            'name' => 'complaint[number]',
         ));
 
         $fieldset->addField('complaint_date', 'date', array(
@@ -98,20 +103,21 @@ class M1_Complaints_Helper_Data extends Mage_Core_Helper_Abstract
             'format' => 'yyyy-MM-dd',
         ));
 
-        $complaintMediaPath = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'complaints' . DS;
+        $complaintPath = Mage::getHelper('complaints/data')->getComplaintPath();
         if ($model->getFile1()) {
-            $file1 = $complaintMediaPath . urlencode($model->getFile1());
+            $file1 = $complaintPath . urlencode($model->getFile1());
         }
 
         if ($model->getFile2()) {
-            $file2 = $complaintMediaPath . urlencode($model->getFile2());
+            $file2 = $complaintPath . urlencode($model->getFile2());
         }
 
         $fieldset->addField('file1', 'file', array(
             'label' => Mage::helper('complaints')->__('Complaint details'),
             'required' => false,
             'name' => 'complaint[file1]',
-            'after_element_html' => ($model->getFile1() ? '<br /><a href="' . $file1 . '">' . urldecode($model->getFile1()) . '</a><br /><p style="margin-top: 5px"><a href="' . $this->getUrl('*/*/*/',
+            'after_element_html' => ($model->getFile1() ? '<br /><a href="' . $file1 . '">' .
+                urldecode($model->getFile1()) . '</a><br /><p style="margin-top: 5px"><a href="' . $this->getUrl('*/*/*/',
                     array(
                         '_current' => true,
                         'delete_file' => 'file1'
@@ -122,7 +128,8 @@ class M1_Complaints_Helper_Data extends Mage_Core_Helper_Abstract
             'label' => Mage::helper('complaints')->__('Complaint'),
             'required' => false,
             'name' => 'complaint[file2]',
-            'after_element_html' => ($model->getFile2() ? '<br /><a href="' . $file2 . '">' . urldecode($model->getFile2()) . '</a><br /><p style="margin-top: 5px"><a href="' . $this->getUrl('*/*/*/',
+            'after_element_html' => ($model->getFile2() ? '<br /><a href="' . $file2 . '">' .
+                urldecode($model->getFile2()) . '</a><br /><p style="margin-top: 5px"><a href="' . $this->getUrl('*/*/*/',
                     array(
                         '_current' => true,
                         'delete_file' => 'file2'

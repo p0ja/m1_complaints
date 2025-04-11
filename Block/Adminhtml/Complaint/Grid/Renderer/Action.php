@@ -10,6 +10,7 @@ class M1_Complaints_Block_Adminhtml_Complaint_Grid_Renderer_Action extends Mage_
                 'caption' => Mage::helper('complaints')->__('Edit'),
             )
         ));
+
         return parent::render($row);
     }
 }

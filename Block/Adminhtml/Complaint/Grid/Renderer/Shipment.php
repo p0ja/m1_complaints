@@ -10,6 +10,7 @@ class M1_Complaints_Block_Adminhtml_Complaint_Grid_Renderer_Shipment
         } else {
             $sdate = '';
         }
+
         return $sdate;
     }
 }

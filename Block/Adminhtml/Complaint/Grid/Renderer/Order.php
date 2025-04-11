@@ -7,10 +7,15 @@ class M1_Complaints_Block_Adminhtml_Complaint_Grid_Renderer_Order
     {
         $this->getColumn()->setActions(array(
             array(
-                'url' => $this->getUrl('adminhtml/sales_order/view', array('order_id' => $row->getOrderId())),
+                'url' => $this->getUrl('adminhtml/sales_order/view',
+                    array(
+                        'order_id' => $row->getOrderId()
+                    )
+                ),
                 'caption' => $row->getIncrementId(),
             )
         ));
+
         return parent::render($row);
     }
 }

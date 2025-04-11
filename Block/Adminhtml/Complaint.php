@@ -12,5 +12,4 @@ class M1_Complaints_Block_Adminhtml_Complaint extends Mage_Adminhtml_Block_Widge
 
         $this->_removeButton('add');
     }
-
 }

@@ -5,13 +5,14 @@ class M1_Complaints_Block_Adminhtml_Complaint_Grid_Renderer_File2
 {
     public function render(Varien_Object $row)
     {
-        $path = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'complaints' . DS;
+        $complaintPath = Mage::getHelper('complaints/data')->getComplaintPath();
         $this->getColumn()->setActions(array(
             array(
-                'url' => $path . urlencode($row->getFile2()),
+                'url' => $complaintPath . urlencode($row->getFile2()),
                 'caption' => urldecode($row->getFile2()),
             )
         ));
+
         return parent::render($row);
     }
 }

@@ -19,10 +19,10 @@ class M1_Complaints_Model_Item_Return extends Varien_Object
     {
         if (is_null($this->_options)) {
             $this->_options = array();
-            $this->_options[self::STATUS_ZAMOWIONY_PO_ODBIOR] = "zamówiony po odbiór";
-            $this->_options[self::STATUS_TAK] = "tak";
-            $this->_options[self::STATUS_NIE] = "nie";
-            $this->_options[self::STATUS_NIE_WROCI] = "nie wróci";
+            $this->_options[self::STATUS_ZAMOWIONY_PO_ODBIOR] = __('ordered for collection');
+            $this->_options[self::STATUS_TAK] = __('yes');
+            $this->_options[self::STATUS_NIE] = __('no');
+            $this->_options[self::STATUS_NIE_WROCI] = __('will not return');
         }
         if ($isRequired) {
             array_unshift($this->_options, array(self::STATUS_BRAK => " "));
