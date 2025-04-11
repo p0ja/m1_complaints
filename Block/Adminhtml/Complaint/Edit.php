@@ -3,7 +3,6 @@
 class M1_Complaints_Block_Adminhtml_Complaint_Edit
     extends Mage_Adminhtml_Block_Widget_Form_Container
 {
-
     public function __construct()
     {
         $this->_objectId = 'entity_id';
@@ -33,7 +32,6 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit
             editForm.submit($('edit_form').action+'back/edit/');
         }
 	    ";
-
     }
 
     public function getHeaderText()
@@ -45,5 +43,4 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit
 
         return Mage::helper('complaints')->__('Edit complaint order item %s', $linkHtml);
     }
-
 }

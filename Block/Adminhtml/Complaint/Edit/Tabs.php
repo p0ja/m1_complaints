@@ -16,6 +16,7 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit_Tabs extends Mage_Adminhtml_B
             Mage_Sales_Model_Item_Status::STATUS_COMPLAINT,
             Mage_Sales_Model_Item_Status::STATUS_COMPLAINT_EXTERNAL
         ), true)) {
+
             $this->addTab('complaint_section', array(
                 'label' => Mage::helper('complaints')->__('Complaint'),
                 'title' => Mage::helper('complaints')->__('Complaint'),

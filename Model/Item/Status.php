@@ -24,18 +24,18 @@ class M1_Complaints_Model_Item_Status extends Varien_Object
     {
         if (is_null($this->_options)) {
             $this->_options = array();
-            $this->_options[self::STATUS_WAIT_FOR_PROTOCOL] = "waiting for protocol";
-            $this->_options[self::STATUS_REGISTERED] = "registered";
-            $this->_options[self::STATUS_PREPARED] = "prepared";
-            $this->_options[self::STATUS_REPORTED] = "reported";
-            $this->_options[self::STATUS_LOSS] = "loss";
-            $this->_options[self::STATUS_ACCEPTED] = "accepted";
-            $this->_options[self::STATUS_ACCEPTED_AND_COMPENSATED] = "accepted and compensated";
-            $this->_options[self::STATUS_APPEAL] = "appeal";
-            $this->_options[self::STATUS_RABAT] = "sell with discount";
+            $this->_options[self::STATUS_WAIT_FOR_PROTOCOL] = __('waiting for protocol');
+            $this->_options[self::STATUS_REGISTERED] = __('registered');
+            $this->_options[self::STATUS_PREPARED] = __('prepared');
+            $this->_options[self::STATUS_REPORTED] = __('reported');
+            $this->_options[self::STATUS_LOSS] = __('loss');
+            $this->_options[self::STATUS_ACCEPTED] = __('accepted');
+            $this->_options[self::STATUS_ACCEPTED_AND_COMPENSATED] = __('accepted and compensated');
+            $this->_options[self::STATUS_APPEAL] = __('appeal');
+            $this->_options[self::STATUS_RABAT] = __('sell with discount');
         }
         if ($isRequired) {
-            array_unshift($this->_options, array(self::STATUS_OUT => " "));
+            array_unshift($this->_options, array(self::STATUS_OUT => ' '));
         }
 
         return $this->_options;

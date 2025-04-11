@@ -61,7 +61,7 @@ class M1_Complaints_Model_Observer
                 return;
             }
 
-            $complaintPath = Mage::getBaseDir('media') . DS . 'complaints' . DS;
+            $complaintPath = Mage::getHelper('complaints/data')->getComplaintPath();
             switch ($file) {
                 case "file1":
                     if ($model->getFile1()) {
