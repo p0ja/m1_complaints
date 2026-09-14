@@ -6,26 +6,21 @@
             <version>0.1.4</version>
         </M1_Complaints>
     </modules>
-    <frontend>
-        <routers>
-            <complaints>
-                <use>standard</use>
-                <args>
-                    <module>M1_Complaints</module>
-                    <frontName>complaints</frontName>
-                </args>
-            </complaints>
-        </routers>
-    </frontend>
+    <!--
+        Changed: the module no longer declares its own "complaints" admin frontName and hooks into the
+        adminhtml router instead, as required by Magento security patch SUPEE-6788. Admin URLs are now
+        adminhtml/complaint/* instead of complaints/adminhtml_complaint/*. The frontend router was removed,
+        the module has no frontend controllers.
+    -->
     <admin>
         <routers>
-            <complaints>
-                <use>admin</use>
+            <adminhtml>
                 <args>
-                    <module>M1_Complaints</module>
-                    <frontName>complaints</frontName>
+                    <modules>
+                        <M1_Complaints before="Mage_Adminhtml">M1_Complaints_Adminhtml</M1_Complaints>
+                    </modules>
                 </args>
-            </complaints>
+            </adminhtml>
         </routers>
     </admin>
     <adminhtml>
@@ -55,15 +50,10 @@
                     </complaint_delete_file>
                 </observers>
             </salesext29_item_edit_before>
-            <stock_transfer_after_save>
-                <observers>
-                    <complaint_delete_file>
-                        <type>singleton</type>
-                        <class>complaints/observer</class>
-                        <method>stockComplaintTransfer</method>
-                    </complaint_delete_file>
-                </observers>
-            </stock_transfer_after_save>
+            <!--
+                Removed: the stock_transfer_after_save observer called M1_Complaints_Model_Observer::stockComplaintTransfer(),
+                which does not exist. Magento throws "Method is not defined" in developer mode and skips it otherwise.
+            -->
         </events>
         <translate>
             <modules>
@@ -89,16 +79,21 @@
         <models>
             <complaints>
                 <class>M1_Complaints_Model</class>
-                <resourceModel>complaints_mysql4</resourceModel>
+                <resourceModel>complaints_resource</resourceModel>
             </complaints>
-            <complaints_mysql4>
-                <class>M1_Complaints_Model_Mysql4</class>
+            <!--
+                Changed: Magento 1.6+ resource model naming (Model/Resource instead of Model/Mysql4).
+                deprecatedNode keeps complaints_mysql4/* references in other modules working.
+            -->
+            <complaints_resource>
+                <class>M1_Complaints_Model_Resource</class>
+                <deprecatedNode>complaints_mysql4</deprecatedNode>
                 <entities>
                     <item>
                         <table>complaints_items</table>
                     </item>
                 </entities>
-            </complaints_mysql4>
+            </complaints_resource>
         </models>
         <resources>
             <complaints_setup>

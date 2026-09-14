@@ -18,11 +18,14 @@ class M1_Complaints_Model_Item_Return extends Varien_Object
     public function toOptionArray($isRequired = false)
     {
         if (is_null($this->_options)) {
+            // Changed: translated through the module helper, so M1_Complaints.csv applies; the global __()
+            // function is deprecated and does not use the module's translation file.
+            $helper = Mage::helper('complaints');
             $this->_options = array();
-            $this->_options[self::STATUS_ZAMOWIONY_PO_ODBIOR] = __('ordered for collection');
-            $this->_options[self::STATUS_TAK] = __('yes');
-            $this->_options[self::STATUS_NIE] = __('no');
-            $this->_options[self::STATUS_NIE_WROCI] = __('will not return');
+            $this->_options[self::STATUS_ZAMOWIONY_PO_ODBIOR] = $helper->__('ordered for collection');
+            $this->_options[self::STATUS_TAK] = $helper->__('yes');
+            $this->_options[self::STATUS_NIE] = $helper->__('no');
+            $this->_options[self::STATUS_NIE_WROCI] = $helper->__('will not return');
         }
         // Changed: array_unshift() renumbered the option keys (every select option saved the wrong value)
         // and modified the cached options, adding another empty entry on each call. The + operator keeps the

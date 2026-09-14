@@ -7,7 +7,8 @@
                     <children>
                         <complaints translate="title" module="complaints">
                             <title>Complaints</title>
-                            <action>complaints/adminhtml_complaint</action>
+                            <!-- Changed: route moved under the adminhtml router (see config.xml) -->
+                            <action>adminhtml/complaint</action>
                             <sort_order>10</sort_order>
                         </complaints>
                     </children>

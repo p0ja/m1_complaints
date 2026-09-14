@@ -45,9 +45,11 @@ class M1_Complaints_Block_Adminhtml_Complaint_Grid extends Mage_Adminhtml_Block_
 
     protected function _prepareColumns()
     {
-        $delay = Mage::getStoreConfig('complaintsconfig/complaints/delay');
-        if (!$delay) {
-            $delay = 30;
+        // Changed: cast to int, the value is placed into the SQL expression of the deadline column; the default
+        // comes from the model constant instead of a second hard-coded 30.
+        $delay = (int)Mage::getStoreConfig('complaintsconfig/complaints/delay');
+        if ($delay <= 0) {
+            $delay = M1_Complaints_Model_Item::COMPLAINT_DEFAULT_DELAY;
         }
 
         $this->addColumn('id', array(
@@ -80,6 +82,8 @@ class M1_Complaints_Block_Adminhtml_Complaint_Grid extends Mage_Adminhtml_Block_
         $this->addColumn('purchase_cost', array(
             'header' => Mage::helper('complaints')->__('Purchase Cost'),
             'index' => 'purchase_cost',
+            // Added: purchase_cost is a column alias, which MySQL does not accept in WHERE, so filtering failed.
+            'filter_index' => 'oi.base_cost',
             'align' => 'right',
             'width' => '50px',
             'renderer' => 'complaints/adminhtml_complaint_grid_renderer_cost'

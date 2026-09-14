@@ -1,15 +1,25 @@
 <?php
 
-class M1_Complaints_Model_Mysql4_Item_Collection extends Mage_Sales_Model_Mysql4_Item_Collection
+/**
+ * Changed: renamed from M1_Complaints_Model_Mysql4_Item_Collection (Magento 1.6+ naming). It extended
+ * Mage_Sales_Model_Mysql4_Item_Collection, the collection of another module's sales/item entity, although it
+ * only uses the generic collection API; it now extends the core database collection.
+ */
+class M1_Complaints_Model_Resource_Item_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
-    public function _construct()
+    protected function _construct()
     {
-        parent::_construct();
         $this->_init('complaints/item');
     }
 
     public function addComplaintToSelect($ws = true)
     {
+        // Changed: the deadline used a hard-coded 30 days and ignored the configured delay period.
+        $delay = (int)Mage::getStoreConfig('complaintsconfig/complaints/delay');
+        if ($delay <= 0) {
+            $delay = M1_Complaints_Model_Item::COMPLAINT_DEFAULT_DELAY;
+        }
+
         $this->getSelect()->joinLeft(
             array('oi' => $this->getTable('sales/order_item')),
             'main_table.order_item_id = oi.item_id',
@@ -48,10 +58,16 @@ class M1_Complaints_Model_Mysql4_Item_Collection extends Mage_Sales_Model_Mysql4
         $this->getSelect()->joinLeft(
             array('sg' => $this->getTable('sales/shipment_grid')),
             'ssi.parent_id = sg.entity_id',
-            array('date_add(sg.created_at, interval 30 day) as deadline')
+            array(
+                // Added: lets M1_Complaints_Model_Item::getSentDate() use the joined shipment date instead of
+                // loading the order and its shipments for every grid and export row.
+                'created_at as shipment_created_at',
+                'date_add(sg.created_at, interval ' . $delay . ' day) as deadline'
+            )
         );
         if ($ws) {
-            $this->getSelect()->where('s.stock_code like "%' . M1_Complaints_Model_Item::COMPLAINT_MAGAZYN_SUFFIX . '%" and si.qty > 0');
+            $this->getSelect()->where('s.stock_code like ?', '%' . M1_Complaints_Model_Item::COMPLAINT_MAGAZYN_SUFFIX . '%')
+                ->where('si.qty > 0');
         }
         $this->getSelect()->group('main_table.entity_id');
 

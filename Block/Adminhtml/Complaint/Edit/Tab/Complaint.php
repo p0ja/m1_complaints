@@ -9,9 +9,9 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit_Tab_Complaint extends Mage_Ad
             $item = Mage::registry('item_data');
             $itemId = $item->getItem()->getItemId();
 
-            $data = array('order_item_id' => $itemId);
-            // Changed: Mage::getHelper() does not exist in Magento 1 (fatal error).
-            Mage::helper('complaints/sql')->writeData('complaints_items', $data);
+            // Changed: the record is created through the model. Helper_Sql (removed) built a raw INSERT with the
+            // hard-coded table name complaints_items, which ignored the table prefix and the resource model.
+            Mage::getModel('complaints/item')->setOrderItemId($itemId)->save();
 
             $model = Mage::getModel('complaints/item')->loadByOrderItemId($itemId);
         }

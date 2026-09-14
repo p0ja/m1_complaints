@@ -1,21 +1,28 @@
 <?php
 
-class M1_Complaints_Model_Mysql4_Item extends Mage_Core_Model_Mysql4_Abstract
+/**
+ * Changed: renamed from M1_Complaints_Model_Mysql4_Item. Magento 1.6+ names resource models Model_Resource_*
+ * and extends Mage_Core_Model_Resource_Db_Abstract; the Mysql4 classes are deprecated aliases.
+ */
+class M1_Complaints_Model_Resource_Item extends Mage_Core_Model_Resource_Db_Abstract
 {
-    public function _construct()
+    protected function _construct()
     {
         $this->_init('complaints/item', 'entity_id');
     }
 
+    /**
+     * Changed: loads the record in one query. Before, a first query fetched order_item_id by order_item_id
+     * and a second query loaded the record by that same value.
+     *
+     * @param M1_Complaints_Model_Item $item
+     * @param int $itemId
+     * @return $this
+     */
     public function loadByOrderItemId(M1_Complaints_Model_Item $item, $itemId)
     {
-        $select = $this->_getReadAdapter()->select()
-            ->from($this->getMainTable(), array('order_item_id'))
-            ->where('order_item_id=:order_item_id')->limit(1);
-
-        if ($id = $this->_getReadAdapter()->fetchOne($select, array('order_item_id' => $itemId))) {
-            $this->load($item, $id, 'order_item_id');
-        } else {
+        $this->load($item, (int)$itemId, 'order_item_id');
+        if (!$item->getId()) {
             $item->setData(array());
         }
 

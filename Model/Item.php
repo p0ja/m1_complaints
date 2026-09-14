@@ -5,7 +5,12 @@ class M1_Complaints_Model_Item extends Mage_Core_Model_Abstract
     const COMPLAINT_MAGAZYN_SUFFIX = "_complaint";
     const COMPLAINT_DEFAULT_DELAY = 30;
 
-    public function _construct()
+    /**
+     * @var Mage_Sales_Model_Order_Item|null
+     */
+    protected $_orderItem;
+
+    protected function _construct()
     {
         parent::_construct();
         $this->_init('complaints/item');
@@ -18,20 +23,37 @@ class M1_Complaints_Model_Item extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    /**
+     * Changed: collection rows already carry increment_id from the joined order table, so the grid and the
+     * export no longer load the order item and the order for every row. A single complaint reuses the order
+     * of its cached order item instead of loading the order again.
+     *
+     * @return string
+     */
     public function getIncrementId()
     {
-        $order_item = $this->getSalesItem();
-        if (!$order_item) {
-
-            return '';
+        if ($this->hasData('increment_id')) {
+            return $this->getData('increment_id');
         }
 
-        return Mage::getModel('sales/order')->load($order_item->getOrderId())->getIncrementId();
+        $order = $this->getOrder();
+
+        return $order ? (string)$order->getIncrementId() : '';
     }
 
+    /**
+     * Changed: the order item is cached per complaint; getIncrementId(), getOrder() and getOrderItem() each
+     * loaded it again.
+     *
+     * @return Mage_Sales_Model_Order_Item
+     */
     public function getSalesItem()
     {
-        return Mage::getModel('sales/order_item')->load($this->getOrderItemId());
+        if ($this->_orderItem === null || (int)$this->_orderItem->getId() !== (int)$this->getOrderItemId()) {
+            $this->_orderItem = Mage::getModel('sales/order_item')->load($this->getOrderItemId());
+        }
+
+        return $this->_orderItem;
     }
 
     public function getOrder()
@@ -81,18 +103,29 @@ class M1_Complaints_Model_Item extends Mage_Core_Model_Abstract
             return $this->getShipmentDate();
         }
 
-        $order = Mage::getModel('sales/order')->load($this->getOrderId());
-        $shipments = $order->getShipmentsCollection();
-        foreach ($shipments as $shipment) {
-            $shipment = Mage::getModel('sales/order_shipment')->load($shipment->getId());
+        // Changed: collection rows carry the shipment date from the joined shipment grid
+        // (Resource_Item_Collection::addComplaintToSelect), so rows no longer load the order and every shipment.
+        if ($this->hasData('shipment_created_at')) {
+            return $this->getData('shipment_created_at') ? $this->getData('shipment_created_at') : false;
+        }
 
+        // Changed: a single complaint looks up its own order. order_id is only set on collection rows, so the
+        // previous load($this->getOrderId()) never found an order here. Shipments are no longer reloaded one by
+        // one, and the ids are compared as integers.
+        $order = $this->getOrder();
+        if (!$order || !$order->getId()) {
+            return false;
+        }
+
+        foreach ($order->getShipmentsCollection() as $shipment) {
             foreach ($shipment->getAllItems() as $item) {
-                if ($item->getOrderItemId() === $this->getOrderItemId()) {
+                if ((int)$item->getOrderItemId() === (int)$this->getOrderItemId()) {
 
                     return $shipment->getCreatedAt();
                 }
             }
         }
+
         return false;
     }
 
