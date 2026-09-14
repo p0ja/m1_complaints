@@ -18,20 +18,22 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit_Form extends Mage_Adminhtml_B
         $form->setUseContainer(true);
         $complaintsCount = Mage::getModel('complaints/item')->getComplaintsItemQty($itemId);
 
+        // Changed: order, product and warehouse values are escaped before they are placed in the legend HTML
+        // (stored XSS through product names or shipping descriptions).
         if ($model->getStockId()) {
-            $storage = $model->getStock()->getStockName();
+            $storage = $this->escapeHtml($model->getStock()->getStockName());
         } else {
             $storage = '<span>No storage!</span>';
         }
 
         $qtyOrdered = (int)$orderItem->getQtyOrdered();
         $fieldset = $form->addFieldset('add_item_form', array(
-            'legend' => $this->__('Order number:') . ' ' . $model->getIncrementId() .
-                '<br/>Product name: ' . $orderItem->getName() .
-                '<br/>Catalog number: ' . $orderItem->getSku() .
-                '<br/>Order quantity: ' . $qtyOrdered . ' (qty in complaint: ' . $complaintsCount . ')' .
+            'legend' => $this->escapeHtml($this->__('Order number:') . ' ' . $model->getIncrementId()) .
+                '<br/>Product name: ' . $this->escapeHtml($orderItem->getName()) .
+                '<br/>Catalog number: ' . $this->escapeHtml($orderItem->getSku()) .
+                '<br/>Order quantity: ' . $qtyOrdered . ' (qty in complaint: ' . (int)$complaintsCount . ')' .
                 '<br/>Storage: ' . $storage .
-                '<br/>Shippment: ' . $model->getOrder()->getShippingDescription()
+                '<br/>Shippment: ' . $this->escapeHtml($model->getOrder()->getShippingDescription())
         ));
 
         if ($model->getId()) {
@@ -113,42 +115,33 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit_Form extends Mage_Adminhtml_B
             'format' => 'yyyy-MM-dd',
         ));
 
-        $complaintMediaPath = Mage::getHelper('complaints/data')->getComplaintPath();
-        if ($model->getFile1()) {
-            $file1 = $complaintMediaPath . urlencode($model->getFile1());
-        }
-
-        if ($model->getFile2()) {
-            $file2 = $complaintMediaPath . urlencode($model->getFile2());
-        }
-
         $fieldset->addField('comment', 'textarea', array(
             'label' => Mage::helper('complaints')->__('Comment'),
             'name' => 'comment',
         ));
 
+        // Changed: Mage::getHelper() does not exist in Magento 1 (fatal error). The links now point to the
+        // ACL-protected downloadAction() instead of a public media URL, and the file name is escaped (stored XSS).
         $fieldset->addField('file1', 'file', array(
             'label' => Mage::helper('complaints')->__('Damage report'),
             'required' => false,
             'name' => 'file1',
-            'after_element_html' => ($model->getFile1() ? '<br /><a href="' . $file1 . '">' .
-                urldecode($model->getFile1()) . '</a><br /><p style="margin-top: 5px"><a href="' . $this->getUrl('*/*/*/',
-                    array(
-                        '_current' => true,
-                        'delete_file' => 'file1'
-                    )) . '"><span class="error">' . Mage::helper('complaints')->__('Delete') . '</span></a></p>' : ''),
+            'after_element_html' => Mage::helper('complaints')->getComplaintFileHtml(
+                $model,
+                'file1',
+                $this->getUrl('*/*/*/', array('_current' => true, 'delete_file' => 'file1'))
+            ),
         ));
 
         $fieldset->addField('file2', 'file', array(
             'label' => Mage::helper('complaints')->__('Complaint'),
             'required' => false,
             'name' => 'file2',
-            'after_element_html' => ($model->getFile2() ? '<br /><a href="' . $file2 . '">' .
-                urldecode($model->getFile2()) . '</a><br /><p style="margin-top: 5px"><a href="' . $this->getUrl('*/*/*/',
-                    array(
-                        '_current' => true,
-                        'delete_file' => 'file2'
-                    )) . '"><span class="error">' . Mage::helper('complaints')->__('Delete') . '</span></a></p>' : ''),
+            'after_element_html' => Mage::helper('complaints')->getComplaintFileHtml(
+                $model,
+                'file2',
+                $this->getUrl('*/*/*/', array('_current' => true, 'delete_file' => 'file2'))
+            ),
         ));
 
         $fieldset->addField('rabat', 'text', array(

@@ -20,7 +20,9 @@ class M1_Complaints_Model_Mysql4_Item_Collection extends Mage_Sales_Model_Mysql4
                 'product_options',
                 'sku',
                 'name',
-                'base_cost as purchase_amount'
+                // Changed: aliased as purchase_cost, the name the grid column and the export read;
+                // purchase_amount was never used, so the purchase cost was always empty.
+                'base_cost as purchase_cost'
             )
         );
         $this->getSelect()->joinLeft(
@@ -59,10 +61,13 @@ class M1_Complaints_Model_Mysql4_Item_Collection extends Mage_Sales_Model_Mysql4
     public function addItemIdFilter($array)
     {
         $select = $this->getSelect();
-        if (is_array($array)) {
-            $select->where('main_table.item_id in (' . implode(',', $array) . ')');
+        // The ids are complaint entity_ids from the grid mass action (see Grid::_prepareMassaction),
+        // so never trust them as SQL.
+        $complaintIds = is_array($array) ? array_filter(array_map('intval', $array)) : array();
+        if ($complaintIds) {
+            $select->where('main_table.entity_id IN (?)', $complaintIds);
         } else {
-            $select->where('main_table.item_id = 0');
+            $select->where('main_table.entity_id = 0');
         }
 
         return $this;

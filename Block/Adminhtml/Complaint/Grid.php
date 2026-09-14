@@ -7,7 +7,8 @@ class M1_Complaints_Block_Adminhtml_Complaint_Grid extends Mage_Adminhtml_Block_
         parent::__construct();
 
         $this->setId('complaintGrid');
-        $this->setDefaultSort('shippment_date');
+        // Changed: the column id is shipment_date; the misspelled id made the default sort a no-op.
+        $this->setDefaultSort('shipment_date');
         $this->setUseAjax(true);
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);

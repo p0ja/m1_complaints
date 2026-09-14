@@ -12,7 +12,8 @@ class M1_Complaints_Block_Adminhtml_Complaint_Grid_Renderer_Order
                         'order_id' => $row->getOrderId()
                     )
                 ),
-                'caption' => $row->getIncrementId(),
+                // Changed: escaped, the Action renderer prints the caption as raw HTML.
+                'caption' => $this->escapeHtml($row->getIncrementId()),
             )
         ));
 

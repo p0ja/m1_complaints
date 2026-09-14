@@ -74,9 +74,11 @@ class M1_Complaints_Model_Item extends Mage_Core_Model_Abstract
 
     public function getSentDate()
     {
-        if ($this->getShippingDate()) {
+        // Changed: shipment_date is the column (upgrade 0.1.4); shipping_date never existed, so the stored
+        // date was ignored and the shipments were always searched.
+        if ($this->getShipmentDate()) {
 
-            return $this->getShippingDate();
+            return $this->getShipmentDate();
         }
 
         $order = Mage::getModel('sales/order')->load($this->getOrderId());
@@ -132,7 +134,8 @@ class M1_Complaints_Model_Item extends Mage_Core_Model_Abstract
             }
         } else {
             foreach ($complaints as $complaint) {
-                $dates_arr[$complaint->getId()] = $complaint->getComplaintRecivedAt();
+                // Changed: complaint_date is the column (upgrade 0.1.4); complaint_recived_at never existed.
+                $dates_arr[$complaint->getId()] = $complaint->getComplaintDate();
             }
         }
 

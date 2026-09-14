@@ -7,6 +7,12 @@ $installer->startSetup();
 $tblItem = $this->getTable('complaints/item');
 $tblSalesItem = $this->getTable('sales/item');
 
+// Changed: the migration filter read "na_stanie => 1", which is not valid SQL, so the install failed.
+// It now copies the items in complaint status, using the same statuses Block_Adminhtml_Complaint_Edit_Tabs
+// treats as a complaint.
+$complaintStatuses = (int)Mage_Sales_Model_Item_Status::STATUS_COMPLAINT . ','
+    . (int)Mage_Sales_Model_Item_Status::STATUS_COMPLAINT_EXTERNAL;
+
 $installer->run("
 
 CREATE TABLE IF NOT EXISTS `$tblItem` (
@@ -31,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `$tblItem` (
 INSERT INTO $tblItem(`item_id`,`kwota_zwrotu`,`data_zwrotu`,`nr_reklamacji`,`reklamacja_data_zgloszenia`,`reklamacja_nr_listu`) 
 	SELECT `entity_id`,`kwota_zwrotu`,`data_zwrotu`,`nr_reklamacji`,`reklamacja_data_zgloszenia`,`reklamacja_nr_listu` 
 	FROM $tblSalesItem as si
-	WHERE si.`na_stanie` => 1;  
+	WHERE si.`na_stanie` IN ($complaintStatuses);
 ");
 
 $installer->endSetup();

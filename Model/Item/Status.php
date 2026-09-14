@@ -34,8 +34,11 @@ class M1_Complaints_Model_Item_Status extends Varien_Object
             $this->_options[self::STATUS_APPEAL] = __('appeal');
             $this->_options[self::STATUS_RABAT] = __('sell with discount');
         }
+        // Changed: array_unshift() renumbered the status keys (every select option saved the wrong value)
+        // and modified the cached options, adding another empty entry on each call. The + operator keeps the
+        // keys and leaves $this->_options untouched.
         if ($isRequired) {
-            array_unshift($this->_options, array(self::STATUS_OUT => ' '));
+            return array(self::STATUS_OUT => ' ') + $this->_options;
         }
 
         return $this->_options;

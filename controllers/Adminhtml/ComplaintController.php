@@ -10,6 +10,16 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
+    /**
+     * Restrict the controller to admin roles granted the complaints ACL resource (etc/adminhtml.xml).
+     *
+     * @return bool
+     */
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('sales/order/complaints');
+    }
+
     protected function _initAction()
     {
         $this->loadLayout()->_setActiveMenu('sales/order/complaints');
@@ -48,9 +58,10 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
         $orderItemId = $request->getParam('order_item_id');
 
         try {
+            // Changed: complaint_date replaces the Polish reklamacja_data_zgloszenia column (upgrade 0.1.4).
             $complaint = Mage::getModel('complaints/item')
                 ->setOrderItemId($orderItemId)
-                ->setReklamacjaDataZgloszenia(date("Y-m-d"))
+                ->setComplaintDate(date("Y-m-d"))
                 ->save();
 
             if ($complaint->getId()) {
@@ -76,29 +87,13 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
         $model = Mage::getModel('complaints/item')->load($id);
 
         if (isset($model) && $model->getOrderItemId()) {
-            if ($file = $this->getRequest()->getParam('delete_file')) {
-                $complaintPath = Mage::getHelper('complaints/data')->getComplaintPath();
-
-                switch ($file) {
-                    case "file1":
-                        if ($model->getFile1()) {
-                            $file1 = $complaintPath . $model->getFile1();
-                            if (file_exists($file1)) {
-                                unlink($file1);
-                            }
-                            $model->setFile1()->save();
-                        }
-                        break;
-                    case "file2":
-                        if ($model->getFile2()) {
-                            $file2 = $complaintPath . $model->getFile2();
-                            if (file_exists($file2)) {
-                                unlink($file2);
-                            }
-                            $model->setFile2()->save();
-                        }
-                        break;
-                }
+            // Changed: Mage::getHelper() does not exist in Magento 1 (fatal error); files are deleted from
+            // the complaints directory on disk instead of a media URL.
+            $file = $this->getRequest()->getParam('delete_file');
+            $helper = Mage::helper('complaints');
+            if ($helper->isComplaintFileField($file) && $model->getData($file)) {
+                $helper->deleteComplaintFile($model->getData($file));
+                $model->setData($file, null)->save();
             }
 
             $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
@@ -122,22 +117,15 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
                 $model->loadByOrderItemId($request->getParam('order_item_id'));
             }
 
-            $complaintsPath = Mage::getHelper('complaints/data')->getComplaintPath();
-            if (isset($_FILES['file1']['name']) && (file_exists($_FILES['file1']['tmp_name']))) {
-                Mage::getHelper('complaints/upload')->uploadFile($data, 'file1');
-                if ($model->getFile1()) {
-                    $file1 = $complaintsPath . $model->getFile1();
-                    if (file_exists($file1)) {
-                        unlink($file1);
-                    }
-                }
-            }
-            if (isset($_FILES['file2']['name']) && (file_exists($_FILES['file2']['tmp_name']))) {
-                Mage::getHelper('complaints/upload')->uploadFile($data, 'file2');
-                if ($model->getFile2()) {
-                    $file2 = $complaintsPath . $model->getFile2();
-                    if (file_exists($file2)) {
-                        unlink($file2);
+            // Changed: Mage::getHelper() does not exist in Magento 1 (fatal error). A replaced document is
+            // now deleted only when the new upload succeeded and the record was saved; before, a failed
+            // upload still deleted the old file while the record kept pointing at it.
+            $replacedFiles = array();
+            foreach (array('file1', 'file2') as $field) {
+                if (isset($_FILES[$field]['tmp_name']) && file_exists($_FILES[$field]['tmp_name'])) {
+                    $previousFile = $model->getData($field);
+                    if (Mage::helper('complaints/upload')->uploadFile($data, $field) && $previousFile) {
+                        $replacedFiles[] = $previousFile;
                     }
                 }
             }
@@ -156,6 +144,10 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
 
             try {
                 $model->save();
+
+                foreach ($replacedFiles as $replacedFile) {
+                    Mage::helper('complaints')->deleteComplaintFile($replacedFile);
+                }
 
                 $message = Mage::helper('complaints')->__('Record saved successfully.');
                 Mage::getSingleton('adminhtml/session')->addSuccess($message);
@@ -203,6 +195,28 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
         $this->_redirect('*/*/');
     }
 
+    /**
+     * Streams a complaint document to the browser.
+     *
+     * Added: documents moved from the public media/ directory to var/complaints/, so they are served here,
+     * behind the admin login and the _isAllowed() ACL check.
+     */
+    public function downloadAction()
+    {
+        $helper = Mage::helper('complaints');
+        $field = $this->getRequest()->getParam('file');
+        $model = Mage::getModel('complaints/item')->load((int)$this->getRequest()->getParam('entity_id'));
+        $path = $helper->isComplaintFileField($field) ? $helper->getComplaintFilePath($model->getData($field)) : null;
+
+        if (!$model->getId() || !$path || !is_file($path)) {
+            Mage::getSingleton('adminhtml/session')->addError($helper->__('File not found.'));
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        $this->_prepareDownloadResponse(basename($path), array('type' => 'filename', 'value' => $path));
+    }
+
     public function csvexportAction()
     {
         $request = $this->getRequest();
@@ -222,9 +236,10 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
             if ($orderItem->getReservedQty() > 0) {
                 Mage::getModel('complaints/backToSell')->updateStock($orderItem);
             }
+            // Changed: complaint_date replaces the Polish reklamacja_data_zgloszenia column (upgrade 0.1.4).
             Mage::getModel('complaints/item')
                 ->setOrderItemId($orderItemId)
-                ->setReklamacjaDataZgloszenia(date("Y-m-d"))
+                ->setComplaintDate(date("Y-m-d"))
                 ->save();
         } catch (Exception $ex) {
             $message = $this->__('An error occured') . ' : ' . $ex->getMessage();

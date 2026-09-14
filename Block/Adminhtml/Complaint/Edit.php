@@ -39,7 +39,8 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit
         $orderId = Mage::registry('item_data')->getOrderId();
         $order = Mage::getModel('sales/order')->load($orderId);
         $url = $this->getUrl('adminhtml/sales_order/view', array('order_id' => $order->getId()));
-        $linkHtml = "<a href=$url>{$order->getIncrementId()}</a>";
+        // Changed: the href was unquoted and the increment id unescaped.
+        $linkHtml = '<a href="' . $this->escapeHtml($url) . '">' . $this->escapeHtml($order->getIncrementId()) . '</a>';
 
         return Mage::helper('complaints')->__('Edit complaint order item %s', $linkHtml);
     }

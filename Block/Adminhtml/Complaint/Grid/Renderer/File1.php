@@ -5,11 +5,13 @@ class M1_Complaints_Block_Adminhtml_Complaint_Grid_Renderer_File1
 {
     public function render(Varien_Object $row)
     {
-        $complaintPath = Mage::getHelper('complaints/data')->getComplaintPath();
+        // Changed: Mage::getHelper() does not exist in Magento 1 (fatal error). The link goes through the
+        // ACL-protected downloadAction() instead of a public media URL, and the caption is escaped because
+        // the Action renderer prints it as raw HTML (stored XSS through the uploaded file name).
         $this->getColumn()->setActions(array(
             array(
-                'url' => $complaintPath . urlencode($row->getFile1()),
-                'caption' => urldecode($row->getFile1()),
+                'url' => Mage::helper('complaints')->getComplaintFileUrl($row->getId(), 'file1'),
+                'caption' => $this->escapeHtml($row->getFile1()),
             )
         ));
 

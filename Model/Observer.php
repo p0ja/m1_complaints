@@ -22,13 +22,20 @@ class M1_Complaints_Model_Observer
                 $model->setOrderItemId($complaint['order_item_id'])->save();
             }
 
-            $files = $_FILES['complaint']['name'];
-
-            if (isset($files['file1']) && (file_exists($_FILES['complaint']['tmp_name']['file1']))) {
-                Mage::getHelper('complaints/upload')->uploadFile($complaint, 'file1');
-            }
-            if (isset($files['file2']) && (file_exists($_FILES['complaint']['tmp_name']['file2']))) {
-                Mage::getHelper('complaints/upload')->uploadFile($complaint, 'file2');
+            // Changed: Mage::getHelper() does not exist in Magento 1 (fatal error). The tab form sends nested
+            // upload fields, so the uploader now gets the complaint[fileN] id; it used to look for a top-level
+            // fileN upload and never found one. $_FILES['complaint'] is checked before use.
+            $replacedFiles = array();
+            foreach (array('file1', 'file2') as $field) {
+                if (isset($_FILES['complaint']['tmp_name'][$field])
+                    && file_exists($_FILES['complaint']['tmp_name'][$field])
+                ) {
+                    $previousFile = $model->getData($field);
+                    $uploaded = Mage::helper('complaints/upload')->uploadFile($complaint, $field, 'complaint[' . $field . ']');
+                    if ($uploaded && $previousFile) {
+                        $replacedFiles[] = $previousFile;
+                    }
+                }
             }
 
             $model->addData($complaint);
@@ -38,6 +45,11 @@ class M1_Complaints_Model_Observer
 
             try {
                 $model->save();
+
+                // Added: a replaced document is removed only after the record points at the new one.
+                foreach ($replacedFiles as $replacedFile) {
+                    Mage::helper('complaints')->deleteComplaintFile($replacedFile);
+                }
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
             }
@@ -61,26 +73,12 @@ class M1_Complaints_Model_Observer
                 return;
             }
 
-            $complaintPath = Mage::getHelper('complaints/data')->getComplaintPath();
-            switch ($file) {
-                case "file1":
-                    if ($model->getFile1()) {
-                        $file1 = $complaintPath . $model->getFile1();
-                        if (file_exists($file1)) {
-                            unlink($file1);
-                        }
-                        $model->setFile1()->save();
-                    }
-                    break;
-                case "file2":
-                    if ($model->getFile2()) {
-                        $file2 = $complaintPath . $model->getFile2();
-                        if (file_exists($file2)) {
-                            unlink($file2);
-                        }
-                        $model->setFile2()->save();
-                    }
-                    break;
+            // Changed: Mage::getHelper() does not exist in Magento 1 (fatal error); files are deleted from
+            // the complaints directory on disk instead of a media URL.
+            $helper = Mage::helper('complaints');
+            if ($helper->isComplaintFileField($file) && $model->getData($file)) {
+                $helper->deleteComplaintFile($model->getData($file));
+                $model->setData($file, null)->save();
             }
         }
     }
