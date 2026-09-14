@@ -1,0 +1,48 @@
+<?php
+/**
+ * Added: template of M1_Complaints_Block_Adminhtml_Complaint_Tab, referenced by the block but missing from the
+ * repository. Lists the order items with their number of complaints and a link that creates a complaint.
+ *
+ * @var M1_Complaints_Block_Adminhtml_Complaint_Tab $this
+ */
+$order = $this->getOrder();
+?>
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head head-products"><?php echo $this->__('Complaints') ?></h4>
+    </div>
+    <div class="grid np">
+        <table cellspacing="0" class="data order-tables">
+            <thead>
+                <tr class="headings">
+                    <th><?php echo $this->__('Product Name') ?></th>
+                    <th><?php echo $this->__('SKU') ?></th>
+                    <th class="a-center"><?php echo $this->__('Qty Ordered') ?></th>
+                    <th class="a-center"><?php echo $this->__('Complaints') ?></th>
+                    <th class="a-center last"><?php echo $this->__('Action') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php if ($order && $order->getId()): ?>
+                <?php foreach ($order->getAllVisibleItems() as $item): ?>
+                <tr>
+                    <td><?php echo $this->escapeHtml($item->getName()) ?></td>
+                    <td><?php echo $this->escapeHtml($item->getSku()) ?></td>
+                    <td class="a-center"><?php echo (int)$item->getQtyOrdered() ?></td>
+                    <td class="a-center"><?php echo $this->getComplaintCount($item->getId()) ?></td>
+                    <td class="a-center last">
+                        <a href="<?php echo $this->escapeHtml($this->getNewComplaintUrl($item->getId())) ?>">
+                            <?php echo $this->__('Create complaint') ?>
+                        </a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="5" class="a-center last"><?php echo $this->__('No items found.') ?></td>
+                </tr>
+            <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>

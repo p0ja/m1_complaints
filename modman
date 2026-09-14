@@ -1,0 +1,12 @@
+# Added: maps the repository into a Magento 1 installation (https://github.com/colinmollenhour/modman).
+# The module code sits at the repository root, the declaration, admin layout, template and translations under app/.
+Block                                                         app/code/local/M1/Complaints/Block
+controllers                                                   app/code/local/M1/Complaints/controllers
+etc                                                           app/code/local/M1/Complaints/etc
+Helper                                                        app/code/local/M1/Complaints/Helper
+Model                                                         app/code/local/M1/Complaints/Model
+sql                                                           app/code/local/M1/Complaints/sql
+app/etc/modules/M1_Complaints.xml                             app/etc/modules/M1_Complaints.xml
+app/design/adminhtml/default/default/layout/complaints.xml    app/design/adminhtml/default/default/layout/complaints.xml
+app/design/adminhtml/default/default/template/M1/complaints   app/design/adminhtml/default/default/template/M1/complaints
+app/locale/pl_PL/M1_Complaints.csv                            app/locale/pl_PL/M1_Complaints.csv

@@ -84,7 +84,7 @@ class M1_Complaints_Model_BackToSell extends Mage_Core_Model_Abstract
         }
         //update stock for product
         if ($stockItem->getAvailableQty() > 0) {
-            $product = mage::getModel('catalog/product')->load($orderItem->getProductId());
+            $product = Mage::getModel('catalog/product')->load($orderItem->getProductId());
             Mage::helper('AdvancedStock/Product_Base')->updateStocks($product);
         }
     }

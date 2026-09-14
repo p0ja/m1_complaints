@@ -45,7 +45,7 @@ class M1_Complaints_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getComplaintFileUrl($complaintId, $field)
     {
-        return Mage::helper('adminhtml')->getUrl('complaints/adminhtml_complaint/download', array(
+        return Mage::helper('adminhtml')->getUrl('adminhtml/complaint/download', array(
             'entity_id' => (int)$complaintId,
             'file' => $field,
         ));

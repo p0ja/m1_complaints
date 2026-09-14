@@ -65,13 +65,17 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
                 ->save();
 
             if ($complaint->getId()) {
-                $this->_redirect('complaints/adminhtml_complaint/edit', array('entity_id' => $complaint->getId()));
-            } else {
-                $this->_redirect('adminhtml/sales_order/view', array('order_id' => $orderId));
+                // Changed: relative route, the controller now runs under the adminhtml router (config.xml).
+                $this->_redirect('*/*/edit', array('entity_id' => $complaint->getId()));
+                return;
             }
         } catch (Exception $ex) {
-            Mage::getSingleton('adminhtml/session')->addSuccess($this->__('An error occured : %s', $ex->getMessage()));
+            // Changed: reported as an error, not a success message.
+            Mage::getSingleton('adminhtml/session')->addError($this->__('An error occurred: %s', $ex->getMessage()));
         }
+
+        // Changed: also redirects after an error; the action used to end without a response (blank page).
+        $this->_redirect('adminhtml/sales_order/view', array('order_id' => $orderId));
     }
 
     public function editAction()
@@ -176,9 +180,16 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
             try {
                 $model = Mage::getModel('complaints/item');
                 $model->load($id);
+                $files = array($model->getFile1(), $model->getFile2());
                 $model->delete();
 
-                $message = Mage::helper('complaints')->__('Record saved successfully.');
+                // Changed: the stored documents are deleted with the record; they used to stay on disk.
+                foreach (array_filter($files) as $file) {
+                    Mage::helper('complaints')->deleteComplaintFile($file);
+                }
+
+                // Changed: the message said "Record saved successfully." after a delete.
+                $message = Mage::helper('complaints')->__('Record deleted successfully.');
                 Mage::getSingleton('adminhtml/session')->addSuccess($message);
 
                 $this->_redirect('*/*/');
@@ -232,7 +243,7 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
         $orderItemId = $request->getParam('order_item_id');
 
         try {
-            $orderItem = mage::getModel('sales/order_item')->load($orderItemId);
+            $orderItem = Mage::getModel('sales/order_item')->load($orderItemId);
             if ($orderItem->getReservedQty() > 0) {
                 Mage::getModel('complaints/backToSell')->updateStock($orderItem);
             }
@@ -242,8 +253,8 @@ class M1_Complaints_Adminhtml_ComplaintController extends Mage_Adminhtml_Control
                 ->setComplaintDate(date("Y-m-d"))
                 ->save();
         } catch (Exception $ex) {
-            $message = $this->__('An error occured') . ' : ' . $ex->getMessage();
-            Mage::getSingleton('adminhtml/session')->addSuccess($message);
+            // Changed: reported as an error, not a success message.
+            Mage::getSingleton('adminhtml/session')->addError($this->__('An error occurred: %s', $ex->getMessage()));
         }
 
         $this->_redirect('adminhtml/sales_order/view', array('order_id' => $orderId));

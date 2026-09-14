@@ -18,7 +18,9 @@ class M1_Complaints_Model_Observer
 
             $model->loadByOrderItemId($complaint['order_item_id']);
             if (!$model->getOrderItemId()) {
-                $model = Mage::getSingleton('complaints/item');
+                // Changed: getModel() instead of getSingleton(); a singleton model would be shared by every later
+                // getSingleton('complaints/item') call in the same request and carry this record's data.
+                $model = Mage::getModel('complaints/item');
                 $model->setOrderItemId($complaint['order_item_id'])->save();
             }
 

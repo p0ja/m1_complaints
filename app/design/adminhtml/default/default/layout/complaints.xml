@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    Added: layout update referenced by etc/config.xml but missing from the repository. It places the
+    Complaints tab (M1_Complaints_Block_Adminhtml_Complaint_Tab) on the admin order view.
+-->
+<layout>
+    <adminhtml_sales_order_view>
+        <reference name="sales_order_tabs">
+            <action method="addTab">
+                <name>complaints</name>
+                <block>complaints/adminhtml_complaint_tab</block>
+            </action>
+        </reference>
+    </adminhtml_sales_order_view>
+</layout>

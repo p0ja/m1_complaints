@@ -1,5 +1,15 @@
 <?xml version="1.0"?>
 <config>
+    <!--
+        Added: the section referenced the M1config tab, which no file defined, so the configuration screen was
+        not listed. Magento merges this node with an M1config tab declared by other M1 modules.
+    -->
+    <tabs>
+        <M1config translate="label" module="complaints">
+            <label>M1</label>
+            <sort_order>1000</sort_order>
+        </M1config>
+    </tabs>
     <sections>
         <complaintsconfig translate="label" module="complaints">
             <label>Complaints</label>
@@ -18,24 +28,28 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
-                        <delay translate="label">
+                        <delay translate="label comment">
                             <label>Delay period (days)</label>
                             <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment><![CDATA[complaint service duration since shipment (default=30)]]></comment>
+                            <comment><![CDATA[Complaint handling period in days since shipment (default 30).]]></comment>
                         </delay>
-                        <filetypes translate="label">
-                            <label>typy plików</label>
+                        <!--
+                            Changed: English label like every other field (translated in M1_Complaints.csv), and the
+                            comment said "colon" while Helper_Upload splits the list on commas.
+                        -->
+                        <filetypes translate="label comment">
+                            <label>File types</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment>
-                                <![CDATA[alloed filetypes (separated by colon) protocols and complaints]]></comment>
+                            <comment><![CDATA[Allowed file extensions for protocols and complaints, separated by commas, e.g. pdf, jpg, png.]]></comment>
                         </filetypes>
                     </fields>
                 </complaints>

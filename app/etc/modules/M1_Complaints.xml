@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+    Added: module declaration, required by Magento to load the module; it was not part of the repository.
+    <depends> makes Magento load the modules this one uses first. The sales/item model, the Mage_Sales_Model_Item_Status
+    constants and the salesext29_* events come from the shop's own sales extension module; add it here under its
+    real module name.
+-->
+<config>
+    <modules>
+        <M1_Complaints>
+            <active>true</active>
+            <codePool>local</codePool>
+            <depends>
+                <Mage_Adminhtml/>
+                <Mage_Sales/>
+                <Mage_CatalogInventory/>
+                <MDN_AdvancedStock/>
+            </depends>
+        </M1_Complaints>
+    </modules>
+</config>
