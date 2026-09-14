@@ -10,7 +10,8 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit_Tab_Complaint extends Mage_Ad
             $itemId = $item->getItem()->getItemId();
 
             $data = array('order_item_id' => $itemId);
-            Mage::getHelper('complaints/sql')->writeData('complaints_items', $data);
+            // Changed: Mage::getHelper() does not exist in Magento 1 (fatal error).
+            Mage::helper('complaints/sql')->writeData('complaints_items', $data);
 
             $model = Mage::getModel('complaints/item')->loadByOrderItemId($itemId);
         }
@@ -18,7 +19,9 @@ class M1_Complaints_Block_Adminhtml_Complaint_Edit_Tab_Complaint extends Mage_Ad
             $model["complaint[$key]"] = $model[$key];
         }
 
-        $form = Mage::getHelper('complaints/data')->getComplaintForm($model);
+        // Changed: Mage::helper() instead of the non-existent Mage::getHelper(); the block is passed so the
+        // helper can use getData('action'), getSkinUrl() and getUrl(), which a helper does not have.
+        $form = Mage::helper('complaints')->getComplaintForm($model, $this);
         $form->setValues($model->getData());
         $this->setForm($form);
 

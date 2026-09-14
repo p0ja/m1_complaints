@@ -2,26 +2,128 @@
 
 class M1_Complaints_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    public function getComplaintPath()
+    /**
+     * Filesystem directory for complaint documents.
+     *
+     * Changed: replaces getComplaintPath(), which returned a media URL that was passed to file_exists(),
+     * unlink() and the uploader, so none of them worked. Documents also used to be stored under media/,
+     * which the web server serves to anyone. var/ is closed by Magento's var/.htaccess, so the files
+     * are now only reachable through the ACL-protected downloadAction(). Files uploaded before this
+     * change stay in media/complaints/ and have to be moved to var/complaints/.
+     *
+     * @return string
+     */
+    public function getComplaintDir()
     {
-        return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'complaints' . DS;
+        return Mage::getBaseDir('var') . DS . 'complaints' . DS;
     }
 
-    public function getComplaintForm($model)
+    /**
+     * Absolute path of a stored complaint document, or null when there is no file name.
+     *
+     * Added: basename() keeps a tampered file name from pointing outside the complaints directory.
+     *
+     * @param string $fileName
+     * @return string|null
+     */
+    public function getComplaintFilePath($fileName)
+    {
+        $fileName = basename((string)$fileName);
+
+        return $fileName === '' ? null : $this->getComplaintDir() . $fileName;
+    }
+
+    /**
+     * Admin URL that streams a complaint document through the controller.
+     *
+     * Added: replaces the public media URL. The full route is used instead of a relative one so the
+     * link also works when the form is rendered as a tab inside another module's controller.
+     *
+     * @param int $complaintId
+     * @param string $field file1 or file2
+     * @return string
+     */
+    public function getComplaintFileUrl($complaintId, $field)
+    {
+        return Mage::helper('adminhtml')->getUrl('complaints/adminhtml_complaint/download', array(
+            'entity_id' => (int)$complaintId,
+            'file' => $field,
+        ));
+    }
+
+    /**
+     * Added: whitelist for the file field names accepted from request parameters.
+     *
+     * @param string $field
+     * @return bool
+     */
+    public function isComplaintFileField($field)
+    {
+        return in_array($field, array('file1', 'file2'), true);
+    }
+
+    /**
+     * Deletes a stored complaint document; a missing file is ignored.
+     *
+     * Added: the same delete code was copied into the controller and the observer, both using the media URL.
+     *
+     * @param string $fileName
+     */
+    public function deleteComplaintFile($fileName)
+    {
+        $path = $this->getComplaintFilePath($fileName);
+        if ($path && file_exists($path)) {
+            unlink($path);
+        }
+    }
+
+    /**
+     * Download and delete links for a stored document.
+     *
+     * Added: the file name comes from the upload and was printed unescaped (stored XSS), and the markup
+     * was duplicated in the edit form and the tab form.
+     *
+     * @param M1_Complaints_Model_Item $model
+     * @param string $field file1 or file2
+     * @param string $deleteUrl
+     * @return string
+     */
+    public function getComplaintFileHtml($model, $field, $deleteUrl)
+    {
+        $fileName = $model->getData($field);
+        if (!$fileName) {
+            return '';
+        }
+
+        return '<br /><a href="' . $this->escapeHtml($this->getComplaintFileUrl($model->getId(), $field)) . '">'
+            . $this->escapeHtml($fileName) . '</a><br /><p style="margin-top: 5px"><a href="'
+            . $this->escapeHtml($deleteUrl) . '"><span class="error">' . $this->__('Delete') . '</span></a></p>';
+    }
+
+    /**
+     * Changed: takes the block that renders the form. A helper has no getData(), getSkinUrl() or getUrl(),
+     * so the previous $this->getData('action') and $this->getSkinUrl() calls were fatal errors.
+     * The legend values and file names are now escaped (stored XSS).
+     *
+     * @param M1_Complaints_Model_Item $model
+     * @param Mage_Core_Block_Abstract $block
+     * @return Varien_Data_Form
+     */
+    public function getComplaintForm($model, Mage_Core_Block_Abstract $block)
     {
         $form = new Varien_Data_Form(array(
             'id' => 'complaint_form',
-            'action' => $this->getData('action'),
+            'action' => $block->getData('action'),
             'method' => 'post',
             'enctype' => 'multipart/form-data'
         ));
 
         $fieldset = $form->addFieldset('add_item_form', array(
-            'legend' => $this->__('Order number:') . ' ' . $model->getIncrementId() .
-                '<br/>Product name: ' . $model->getOrderItem()->getName() .
-                '<br/>Product number: ' . $model->getOrderItem()->getSku() .
-                '<br/>Quantity: ' . (int)$model->getOrderItem()->getQtyOrdered() .
-                '<br/>Shippment: ' . $model->getOrder()->getShippingDescription()
+            'legend' => $this->escapeHtml($this->__('Order number:') . ' ' . $model->getIncrementId()) .
+                '<br/>' . $this->escapeHtml('Product name: ' . $model->getOrderItem()->getName()) .
+                '<br/>' . $this->escapeHtml('Product number: ' . $model->getOrderItem()->getSku()) .
+                '<br/>' . $this->escapeHtml('Quantity: ' . (int)$model->getOrderItem()->getQtyOrdered()) .
+                '<br/>' . $this->escapeHtml('Shippment: ' . $model->getOrder()->getShippingDescription())
         ));
 
         if ($model->getId()) {
@@ -53,7 +155,7 @@ class M1_Complaints_Helper_Data extends Mage_Core_Helper_Abstract
             'class' => 'validate-date2',
             'required' => false,
             'label' => Mage::helper('complaints')->__('Complaint create date'),
-            'image' => $this->getSkinUrl('images/grid-cal.gif'),
+            'image' => $block->getSkinUrl('images/grid-cal.gif'),
             'format' => 'yyyy-MM-dd',
         ));
 
@@ -62,7 +164,7 @@ class M1_Complaints_Helper_Data extends Mage_Core_Helper_Abstract
             'class' => 'validate-date2',
             'required' => false,
             'label' => Mage::helper('complaints')->__('Shipment date'),
-            'image' => $this->getSkinUrl('images/grid-cal.gif'),
+            'image' => $block->getSkinUrl('images/grid-cal.gif'),
             'format' => 'yyyy-MM-dd',
         ));
 
@@ -99,41 +201,30 @@ class M1_Complaints_Helper_Data extends Mage_Core_Helper_Abstract
             'class' => 'validate-date2',
             'required' => false,
             'label' => Mage::helper('complaints')->__('Return date'),
-            'image' => $this->getSkinUrl('images/grid-cal.gif'),
+            'image' => $block->getSkinUrl('images/grid-cal.gif'),
             'format' => 'yyyy-MM-dd',
         ));
-
-        $complaintPath = Mage::getHelper('complaints/data')->getComplaintPath();
-        if ($model->getFile1()) {
-            $file1 = $complaintPath . urlencode($model->getFile1());
-        }
-
-        if ($model->getFile2()) {
-            $file2 = $complaintPath . urlencode($model->getFile2());
-        }
 
         $fieldset->addField('file1', 'file', array(
             'label' => Mage::helper('complaints')->__('Complaint details'),
             'required' => false,
             'name' => 'complaint[file1]',
-            'after_element_html' => ($model->getFile1() ? '<br /><a href="' . $file1 . '">' .
-                urldecode($model->getFile1()) . '</a><br /><p style="margin-top: 5px"><a href="' . $this->getUrl('*/*/*/',
-                    array(
-                        '_current' => true,
-                        'delete_file' => 'file1'
-                    )) . '"><span class="error">' . Mage::helper('complaints')->__('Delete') . '</span></a></p>' : ''),
+            'after_element_html' => $this->getComplaintFileHtml(
+                $model,
+                'file1',
+                $block->getUrl('*/*/*/', array('_current' => true, 'delete_file' => 'file1'))
+            ),
         ));
 
         $fieldset->addField('file2', 'file', array(
             'label' => Mage::helper('complaints')->__('Complaint'),
             'required' => false,
             'name' => 'complaint[file2]',
-            'after_element_html' => ($model->getFile2() ? '<br /><a href="' . $file2 . '">' .
-                urldecode($model->getFile2()) . '</a><br /><p style="margin-top: 5px"><a href="' . $this->getUrl('*/*/*/',
-                    array(
-                        '_current' => true,
-                        'delete_file' => 'file2'
-                    )) . '"><span class="error">' . Mage::helper('complaints')->__('Delete') . '</span></a></p>' : ''),
+            'after_element_html' => $this->getComplaintFileHtml(
+                $model,
+                'file2',
+                $block->getUrl('*/*/*/', array('_current' => true, 'delete_file' => 'file2'))
+            ),
         ));
 
         $info = "<div style=\"position:relative;width:500px;\" id=\"messages\">

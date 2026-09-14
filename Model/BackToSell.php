@@ -55,7 +55,8 @@ class M1_Complaints_Model_BackToSell extends Mage_Core_Model_Abstract
 
         $product = Mage::getModel('catalog/product')->load($orderItem->getProductId());
         if ($product->getFinalPrice() - $orderItem->getPrice() < 0.02) {
-            Mage::getHelper('complaints/orders')->setOrderItem($orderItem, $order, $discount);
+            // Changed: Mage::getHelper() does not exist in Magento 1 (fatal error).
+            Mage::helper('complaints/orders')->setOrderItem($orderItem, $order, $discount);
         }
 
         if ($stockItem->getAvailableQty() > 0) {

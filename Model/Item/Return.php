@@ -24,9 +24,13 @@ class M1_Complaints_Model_Item_Return extends Varien_Object
             $this->_options[self::STATUS_NIE] = __('no');
             $this->_options[self::STATUS_NIE_WROCI] = __('will not return');
         }
+        // Changed: array_unshift() renumbered the option keys (every select option saved the wrong value)
+        // and modified the cached options, adding another empty entry on each call. The + operator keeps the
+        // keys and leaves $this->_options untouched.
         if ($isRequired) {
-            array_unshift($this->_options, array(self::STATUS_BRAK => " "));
+            return array(self::STATUS_BRAK => ' ') + $this->_options;
         }
+
         return $this->_options;
     }
 
